@@ -1,6 +1,12 @@
 import { startStandaloneServer } from "@apollo/server/standalone";
 import { ApolloServer } from "@apollo/server";
-import { Genre, } from "./interfaces/book";
+var Genre;
+(function (Genre) {
+    Genre[Genre["Mystery"] = 0] = "Mystery";
+    Genre[Genre["Fantasy"] = 1] = "Fantasy";
+    Genre[Genre["Classic"] = 2] = "Classic";
+    Genre[Genre["Fiction"] = 3] = "Fiction";
+})(Genre || (Genre = {}));
 const typeDefs = `#graphql
   type Book {
     id: ID!
@@ -33,8 +39,11 @@ const typeDefs = `#graphql
     authors: [Author]
     author(id: ID!): Author
   }
-    type Mutation {
+  type Mutation {
     addBook(input: BookInput!): Book
+  }
+  type MyAuthor {
+    getAuthorBooks(parent: any): [Book]
   }
 `;
 const books = [
@@ -107,8 +116,8 @@ const resolvers = {
             return newBook;
         },
     },
-    Author: {
-        books: (parent) => {
+    MyAuthor: {
+        getAuthorBooks: (parent) => {
             return books.filter((book) => book.authorId === parent.id);
         },
     },

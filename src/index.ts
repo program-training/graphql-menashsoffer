@@ -1,13 +1,45 @@
 import { startStandaloneServer } from "@apollo/server/standalone";
 import { ApolloServer } from "@apollo/server";
-import {
-  Book,
-  Genre,
-  BookInput,
-  BookMutation,
-  BookQuery,
-} from "./interfaces/book";
-import { AuthorQuery } from "./interfaces/author";
+
+interface Author {
+  id: string;
+  name: string;
+  books: Book[];
+}
+
+interface AuthorQuery {
+  author(id: string): Author;
+}
+
+interface Book {
+  id: string;
+  title: string;
+  authorId: string;
+  genre: Genre;
+}
+
+enum Genre {
+  Mystery,
+  Fantasy,
+  Classic,
+  Fiction,
+}
+
+interface BookQuery {
+  books: Book[];
+  book(id: string): Book;
+}
+
+interface BookInput {
+  id: string;
+  title: string;
+  authorId: string;
+  genre: Genre;
+}
+
+interface BookMutation {
+  addBook(args: BookInput): Book;
+}
 
 const typeDefs = `#graphql
   type Book {
@@ -41,8 +73,11 @@ const typeDefs = `#graphql
     authors: [Author]
     author(id: ID!): Author
   }
-    type Mutation {
+  type Mutation {
     addBook(input: BookInput!): Book
+  }
+  type MyAuthor {
+    getAuthorBooks(parent: any): [Book]
   }
 `;
 
@@ -118,8 +153,8 @@ const resolvers = {
       return newBook;
     },
   },
-  Author: {
-    books: (parent) => {
+  MyAuthor: {
+    getAuthorBooks: (parent) => {
       return books.filter((book) => book.authorId === parent.id);
     },
   },
